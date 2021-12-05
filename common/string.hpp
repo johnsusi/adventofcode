@@ -4,17 +4,22 @@
 #include <string>
 #include <vector>
 
+std::string to_string(const std::string& value)
+{
+    return value;
+}
 template <typename C>
 auto join(C&& container, std::string delim)
 {
-    auto begin = std::begin(container);
-    auto end = std::end(container);
-    if (begin == end) return std::string{};
-    auto init = std::to_string(*begin);
-    std::advance(begin, 1);
-    return std::accumulate(begin, end, init,
+    using namespace std;;
+    auto s = begin(container);
+    auto e = end(container);
+    if (s == e) return string{};
+    auto init = to_string(*s);
+    advance(s, 1);
+    return accumulate(s, e, init,
         [&](const auto& a, auto b){
-            return a + delim + std::to_string(b);
+            return a + delim + to_string(b);
         });
 }
 
