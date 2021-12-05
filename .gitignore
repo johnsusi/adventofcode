@@ -1,5 +1,8 @@
 main
 
+*.dSYM
+
+
 # Prerequisites
 *.d
 
