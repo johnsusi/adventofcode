@@ -22,9 +22,11 @@ struct Program {
 
     std::string to_string() const { return join(opcodes, ","); }
 
+    bool has_output() const { return !output.empty(); }
+
     std::int64_t pop()
     {
-        assert(!output.empty());
+        assert(has_output());
         std::int64_t result = output.front();
         output.pop_front();
         return result;
