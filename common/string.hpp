@@ -33,7 +33,7 @@ auto split_all(const std::string& s, const std::string& delimiter)
       break;
     }
     else
-      result.push_back(s.substr(j, i-j+1-delimiter.size()));
+      result.push_back(s.substr(j, i-j));
 
   return result;
 }
