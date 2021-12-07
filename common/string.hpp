@@ -44,3 +44,12 @@ auto split(const std::string& s, const std::string& delimiter)
   assert(i != std::string::npos);
   return std::pair { s.substr(0, i), s.substr(i+delimiter.size(), s.size() - i - delimiter.size())};
 }
+
+auto repeat(const std::string& input, std::size_t num)
+{
+    std::string result;
+    result.reserve(input.size() * num);
+    while (num--)
+        result += input;
+    return result;
+}
