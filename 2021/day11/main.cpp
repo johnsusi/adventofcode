@@ -22,16 +22,13 @@ const auto adjacent = std::vector{std::pair{0, -1},
 
 auto parse(std::vector<std::string> input)
 {
-
     std::map<std::pair<int, int>, int> octopuses;
-
     int x, y = 0;
     for (auto line : input) {
         x = 0;
         for (auto ch : line) { octopuses[{x++, y}] = ch - '0'; }
         ++y;
     }
-
     return octopuses;
 }
 
