@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -6,19 +7,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-auto parse(std::string line)
-{
-    std::vector<std::string> patterns;
-    std::vector<std::string> outputs;
-    std::stringstream parser(line);
-    for (std::string segment; parser >> segment;) {
-        if (segment == "|") break;
-        patterns.push_back(segment);
-    }
-    for (std::string segment; parser >> segment;) outputs.push_back(segment);
-    return std::pair { patterns, outputs };
-}
 
 auto search(const std::vector<std::string>& patterns, const std::vector<std::string>& outputs)
 {
@@ -40,6 +28,7 @@ auto search(const std::vector<std::string>& patterns, const std::vector<std::str
         std::sort(s.begin(), s.end());
         return s;
     };
+    
     do {
         std::set<int> matches;
         for (auto pattern : patterns) {
@@ -55,10 +44,25 @@ auto search(const std::vector<std::string>& patterns, const std::vector<std::str
     return 0;
 }
 
+auto parse(auto infile)
+{
+    std::vector<int> inputs;
+    for (std::string line; std::getline(infile, line);) {
+        std::vector<std::string> patterns, outputs;
+        std::stringstream parser(line);
+        for (std::string segment; parser >> segment;) {
+            if (segment == "|") break;
+            patterns.push_back(segment);
+        }
+        for (std::string segment; parser >> segment;) outputs.push_back(segment);
+            inputs.push_back(search(patterns, outputs));
+    }
+    return inputs;
+}
+
 auto test(std::string line)
 {
-    auto [patterns, outputs] = parse(line);
-    return search(patterns, outputs);
+    return parse(std::stringstream(line)).front();
 }
 
 auto part1(const std::vector<int>& inputs)
@@ -82,18 +86,10 @@ auto part2(const std::vector<int>& inputs)
 
 int main()
 {
-    std::ifstream infile("data.txt");
-    std::vector<int> inputs;
-    for (std::string line; std::getline(infile, line);)
-    {
-        auto [patterns, outputs] = parse(line);
-        inputs.push_back(search(patterns, outputs));
-    }
-
     assert(test("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb "
                 "cdbaf") == 5353);
-
-    std::cout << part1(inputs) << std::endl; // 381
-    std::cout << part2(inputs) << std::endl; // 1023686
+    auto input = parse(std::ifstream("data.txt"));
+    std::cout << part1(input) << std::endl; // 381
+    std::cout << part2(input) << std::endl; // 1023686
     return 0;
 }
