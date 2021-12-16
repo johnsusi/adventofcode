@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <functional>
@@ -6,6 +7,12 @@
 #include <string>
 #include <tuple>
 #include <vector>
+
+auto parse(auto infile) {
+    std::vector<std::string> map;
+    for (std::string line; std::getline(infile, line);) map.push_back(line);
+    return map;
+}
 
 auto search(const std::vector<std::string>& map)
 {
@@ -59,10 +66,8 @@ auto part2(std::vector<std::string> map)
 
 int main()
 {
-    std::ifstream infile("data.txt");
-    std::vector<std::string> map;
-    for (std::string line; std::getline(infile, line);) map.push_back(line);
-    std::cout << part1(map) << std::endl; // 491
-    std::cout << part2(map) << std::endl; // 1075536
+    auto input = parse(std::ifstream("data.txt"));
+    std::cout << part1(input) << std::endl; // 491
+    std::cout << part2(input) << std::endl; // 1075536
     return 0;
 }
