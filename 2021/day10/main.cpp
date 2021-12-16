@@ -1,8 +1,15 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <tuple>
 #include <vector>
+
+auto parse(auto infile) {
+    std::vector<std::string> input;
+    for (std::string line; std::getline(infile, line);) input.push_back(line);
+    return input;
+}
 
 auto score (char c) {
     switch (c) {
@@ -36,9 +43,7 @@ auto checksum(std::string s)
         if (is_open(ch))
             a.push_back(ch);
         else if (is_close(a.back(), ch))
-        {
             a.pop_back();
-        }
         else return std::tuple { false, ch, a };
     }
     return std::tuple { true, '\0', a };
@@ -85,9 +90,7 @@ auto part2(std::vector<std::string> input)
 
 int main()
 {
-    std::ifstream infile("data.txt");
-    std::vector<std::string> input;
-    for (std::string line; std::getline(infile, line);) input.push_back(line);
+    auto input = parse(std::ifstream("data.txt"));
     std::cout << part1(input) << std::endl; // 271245
     std::cout << part2(input) << std::endl; // 1685293086
     return 0;
