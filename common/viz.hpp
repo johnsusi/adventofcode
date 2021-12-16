@@ -1,11 +1,12 @@
 #pragma once
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <limits>
 #include <map>
 #include <tuple>
 
-template <typename T> auto bounds(std::map<std::pair<int, int>, T> m)
+template <typename T> auto bounds(const std::map<std::pair<int, int>, T>& m)
 {
     auto x1 = std::numeric_limits<int>::max();
     auto y1 = std::numeric_limits<int>::max();
@@ -29,8 +30,19 @@ struct Map {
 
     int& operator[](std::pair<int, int> index) { return data[index]; }
 
-    int operator[](std::pair<int, int> index) const { return data.at(index); }
+    int operator[](std::pair<int, int> index) const
+    {
+        if (auto it = data.find(index); it != data.end()) return it->second;
+        return 0;
+    }
 
+    auto bounds() const { return ::bounds(data); }
+    auto width() const {
+        auto [x1, y1, x2, y2] = ::bounds(data);
+        return x2 - x1 + 1;
+    }
+
+    auto contains(std::pair<int, int> pos) const { return data.contains(pos); }
     std::vector<int> get(std::initializer_list<std::pair<int, int>> indexes) const
     {
         std::vector<int> result;
@@ -44,13 +56,17 @@ struct Map {
         return result;
     }
 
-    std::string to_string() const
+    auto find(int value) const
     {
-        auto [x1, y1, x2, y2] = bounds(data);
-        auto w                = x2 - x1 + 1;
-        auto h                = y2 - y1 + 1;
-        std::cout << w << "x" << h << " (" << x1 << ", " << y1 << " -> " << x2 << ", " << y2 << ")"
-                  << std::endl;
+        for (auto [pos, ch] : data)
+            if (ch == value) return pos;
+        return std::pair{std::numeric_limits<int>::min(), std::numeric_limits<int>::min()};
+    }
+
+    std::string to_string(int x1, int y1, int x2, int y2) const
+    {
+        auto w = x2 - x1 + 1;
+        auto h = y2 - y1 + 1;
         std::string result(w * h + h, ' ');
         for (int i = 0; i < h; ++i) result[w + i * w + i] = '\n';
         for (auto [k, v] : data) {
@@ -58,6 +74,12 @@ struct Map {
             result[x - x1 + (h - 1 - (y - y1)) * w + (h - 1 - (y - y1))] = to_char(v);
         }
         return result;
+    }
+
+    std::string to_string() const
+    {
+        auto [x1, y1, x2, y2] = bounds();
+        return to_string(x1, y1, x2, y2);
     }
 };
 
@@ -83,4 +105,14 @@ auto rotate(const std::pair<int, int>& pos, int deg)
         y = -y;
     }
     return std::pair{x, y};
+}
+
+auto rotate_left(const std::pair<int, int>& pos)
+{
+    return rotate(pos, -90);
+}
+
+auto rotate_right(const std::pair<int, int>& pos)
+{
+    return rotate(pos, +90);
 }

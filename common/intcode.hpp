@@ -4,7 +4,9 @@
 
 #include <deque>
 #include <iostream>
+#include <iterator>
 #include <sstream>
+#include <string>
 #include <vector>
 
 struct Program {
@@ -22,6 +24,7 @@ struct Program {
 
     std::string to_string() const { return join(opcodes, ","); }
 
+    bool has_input() const { return !input.empty(); }
     bool has_output() const { return !output.empty(); }
 
     std::int64_t pop()
@@ -35,6 +38,11 @@ struct Program {
     void push(std::int64_t value)
     {
         input.push_back(value);
+    }
+
+    void push(const char*value)
+    {
+        while (*value) push(*value++);
     }
 
     std::int64_t& operator[](int index) { return opcodes[index]; }
