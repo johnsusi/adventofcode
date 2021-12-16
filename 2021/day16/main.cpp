@@ -3,163 +3,101 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <limits>
-#include <map>
-#include <queue>
-#include <set>
+#include <numeric>
 #include <string>
-#include <tuple>
 #include <vector>
 
-auto parse(auto& infile)
+auto parse(auto &infile)
 {
     std::string result;
     std::getline(infile, result);
     return result;
 }
 
-auto hex(char c)
+auto from_hex(char c)
 {
-    if (c >= '0' && c <= '9')
-        return c - '0';
-    else
-        return (c - 'A') + 10;
+    return (c >= '0' && c <= '9')
+        ? c - '0'
+        : c - 'A' + 10;
 }
-int read_bits(const auto& s, int offset, int length, int* next)
+
+int read_bits(const auto &s, int offset, int length, int *next)
 {
     int result = 0;
-    for (int end = offset + length; offset < end; ++offset) {
+    for (int end = offset + length; offset < end; ++offset)
+    {
         result <<= 1;
         int a = offset / 4;
         int b = 3 - (offset % 4);
-        result |= (hex(s[a]) >> b) & 1;
+        result |= (from_hex(s[a]) >> b) & 1;
     }
-    if (next) *next = offset;
+    if (next)
+        *next = offset;
     return result;
 }
 
-auto read_packet_header(const auto& s, int i, int* next)
+auto read_literal_value(const auto &s, int i, int *next)
 {
-    int ver = read_bits(s, i, 3, next);
-    int id  = read_bits(s, i + 3, 3, next);
-    return std::pair{ver, id};
-}
-
-auto read_literal_value(const auto& s, int i, int* next)
-{
-
-    std::uint64_t result = 0;
-    while (true) {
+    auto result = 0ull;
+    while (true)
+    {
         auto digit = read_bits(s, i, 5, &i);
         result *= 16;
         result += (digit % 16);
-        if (!(digit / 16)) break;
+        if (!(digit / 16))
+            break;
     }
     if (next) *next = i;
     return result;
 }
 
-int sum_packet_versions(const std::string& s, int i, int* next)
+std::uint64_t eval(const std::string &s, int i = 0, int *next = nullptr, std::uint64_t* checksum = nullptr)
 {
-
-    if (i+6 >= s.size()*4)
+    int ver = read_bits(s, i, 3, &i);
+    int id = read_bits(s, i, 3, &i);
+    if (checksum) *checksum += ver;
+    auto params = std::vector<std::uint64_t>{};
+    if (id != 4)
     {
-        return 0;
-    }
-    int result = 0;
-    auto [ver, id] = read_packet_header(s, i, &i);
-    result += ver;
-    if (id == 4)
-        read_literal_value(s, i, &i);
-    else {
         int length_type = read_bits(s, i, 1, &i);
-        if (length_type > 0) {
+        if (length_type > 0)
+        {
             int length = read_bits(s, i, 11, &i);
-            for (int j = 0; j < length; ++j) result += sum_packet_versions(s, i, &i);
+            for (int j = 0; j < length; ++j)
+                params.push_back(eval(s, i, &i, checksum));
         }
-        else {
+        else
+        {
             int length = read_bits(s, i, 15, &i);
-            for (auto end = i + length;i < end;)
-                result += sum_packet_versions(s, i, &i);
+            for (auto end = i + length; i < end;)
+                params.push_back(eval(s, i, &i, checksum));
         }
     }
+
     if (next) *next = i;
-    return result;
+    switch (id) {
+        case 0: return std::accumulate(params.begin(), params.end(), 0ull);
+        case 1: return std::accumulate(params.begin(), params.end(), 1, std::multiplies<int>());
+        case 2: return *std::min_element(params.begin(), params.end());
+        case 3: return *std::max_element(params.begin(), params.end());
+        case 4: return read_literal_value(s, i, next);
+        case 5: return params[0] > params[1] ? 1 : 0;
+        case 6: return params[0] < params[1] ? 1 : 0;
+        case 7: return params[0] == params[1] ? 1 : 0;
+        default: std::terminate();
+    }
 }
 
-
-std::uint64_t eval(const std::string& s, int i, int* next)
-{
-
-    if (i+6 >= s.size()*4)
-    {
-        return 0;
-    }
-    std::uint64_t result = 0;
-    auto [ver, id] = read_packet_header(s, i, &i);
-    // std::cout << ver << ", " << id << ", " << i << std::endl;
-    // result += ver;
-    if (id == 4)
-        result = read_literal_value(s, i, &i);
-    else {
-        int length_type = read_bits(s, i, 1, &i);
-        // std::cout << length_type << std::endl;
-        std::vector<std::uint64_t> vals;
-        if (length_type > 0) {
-            int length = read_bits(s, i, 11, &i);
-            for (int j = 0; j < length; ++j) vals.push_back(eval(s, i, &i));
-        }
-        else {
-            int length = read_bits(s, i, 15, &i);
-            for (auto end = i + length;i < end;)
-                vals.push_back(eval(s, i, &i));
-        }
-
-        switch (id) {
-            case 0:
-                std::cout << "+";
-                for (auto val : vals)
-                    result += val;
-                break;
-            case 1:
-                std::cout << "*";
-                result = 1;
-                for (auto val : vals)
-                    result *= val;
-                break;
-            case 2:
-                result = *std::min_element(vals.begin(), vals.end());
-                break;
-            case 3:
-                result = *std::max_element(vals.begin(), vals.end());
-                break;
-            case 5:
-                std::cout << ">";
-                result = vals[0] > vals[1] ? 1 : 0;
-                break;
-            case 6:
-                std::cout << "<";
-                result = vals[0] < vals[1] ? 1 : 0;
-                break;
-            case 7:
-                std::cout << "=";
-                result = vals[0] == vals[1] ? 1 : 0;
-                break;
-
-        }
-    }
-    if (next) *next = i;
-    std::cout << result << std::endl;
-    return result;
-}
 auto part1(auto input)
 {
-    return sum_packet_versions(input, 0, nullptr);
+    auto result = 0ull;
+    eval(input, 0, nullptr, &result);
+    return result;
 }
 
 auto part2(auto input)
 {
-    return eval(input, 0, nullptr);
+    return eval(input);
 }
 
 int main()
@@ -178,7 +116,7 @@ int main()
     assert(part2("9C0141080250320F1802104A08") == 1);
     std::ifstream infile("data.txt");
     auto input = parse(infile);
-    std::cout << part1(input) << std::endl; //
-    std::cout << part2(input) << std::endl; //
+    std::cout << part1(input) << std::endl; // 945
+    std::cout << part2(input) << std::endl; // 10637009915279
     return 0;
 }
