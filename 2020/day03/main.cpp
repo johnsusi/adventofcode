@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 
 long traverse(int dx, int dy, int w, int h, const std::vector<std::string>& map)
