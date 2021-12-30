@@ -7,8 +7,6 @@
 
 #include <common/string.hpp>
 
-using passport_t = std::map<std::string, std::string>;
-
 bool is_digit(char c)
 {
     return c >= '0' && c <= '9';
@@ -67,28 +65,11 @@ bool is_valid_pid(std::string val)
     return val.size() == 9 && std::all_of(val.begin(), val.end(), is_digit);
 }
 
-bool is_valid_part1(passport_t passport)
-{
-    auto names = std::vector<std::string> {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"};
-    return std::all_of(
-        names.begin(), names.end(), [&](const auto& x) { return passport.contains(x); });
-}
-
-bool is_valid_part2(passport_t passport)
-{
-    return is_valid_part1(passport) && is_valid_byr(passport["byr"]) &&
-           is_valid_iyr(passport["iyr"]) && is_valid_eyr(passport["eyr"]) &&
-           is_valid_hgt(passport["hgt"]) && is_valid_hcl(passport["hcl"]) &&
-           is_valid_ecl(passport["ecl"]) && is_valid_pid(passport["pid"]);
-}
-
-std::vector<passport_t> parse(std::istream&& infile)
-{
-
-    std::vector<passport_t> passports;
-
-    passport_t passport;
-    int count = 0;
+auto parse(auto&& infile)
+{    
+    std::map<std::string, std::string> passport;    
+    std::vector<decltype(passport)> passports;
+    
     for (std::string line; std::getline(infile, line);) {
         if (line.empty()) {
             if (!passport.empty()) {
@@ -107,19 +88,31 @@ std::vector<passport_t> parse(std::istream&& infile)
     return passports;
 }
 
-auto part1(std::vector<passport_t> passports)
+auto part1(auto input)
 {
-    return std::count_if(passports.begin(), passports.end(), is_valid_part1);
+    return std::count_if(input.begin(), input.end(), [](auto passport)
+    {
+        const auto names = std::vector {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"};
+        return std::all_of(
+            names.begin(), names.end(), [&](const auto& x) { return passport.contains(x); });
+    });
+}
+
+auto part2(auto input)
+{
+   return std::count_if(input.begin(), input.end(), [](auto passport)
+   {
+       return is_valid_byr(passport["byr"]) &&
+           is_valid_iyr(passport["iyr"]) && is_valid_eyr(passport["eyr"]) &&
+           is_valid_hgt(passport["hgt"]) && is_valid_hcl(passport["hcl"]) &&
+           is_valid_ecl(passport["ecl"]) && is_valid_pid(passport["pid"]);
+   });
 }
 
 int main()
 {
-
-    auto passports = parse(std::ifstream("data.txt"));
-
-    std::cout << part1(passports) << std::endl; // 235
-    std::cout << std::count_if(passports.begin(), passports.end(), is_valid_part2)
-              << std::endl; // 194
-
+    auto input = parse(std::ifstream("data.txt"));
+    std::cout << part1(input) << std::endl; // 235
+    std::cout << part2(input) << std::endl; // 194
     return 0;
 }
