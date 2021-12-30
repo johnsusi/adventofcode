@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <numeric>
@@ -15,7 +16,7 @@ int main()
     std::getline(infile, schedule);
 
     std::vector<long> a;
-    for (int i = 0, k = 0, l = 0; i < schedule.size();) {
+    for (int i = 0; i < schedule.size();) {
         int j = schedule.find(',', i);
         if (j == std::string::npos) j = schedule.size() + 1;
         std::string x = schedule.substr(i, j - i);
