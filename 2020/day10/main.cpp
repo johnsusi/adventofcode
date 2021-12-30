@@ -25,7 +25,7 @@ int main()
         joltage = data[i];
     }
     int c1 = std::count(diff.begin(), diff.end(), 1);
-    int c2 = std::count(diff.begin(), diff.end(), 2);
+    // int c2 = std::count(diff.begin(), diff.end(), 2);
     int c3 = std::count(diff.begin(), diff.end(), 3);
 
     std::cout << c1 * c3 << std::endl; // 2368
