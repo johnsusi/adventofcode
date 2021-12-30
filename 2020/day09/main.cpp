@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <numeric>
@@ -18,7 +17,7 @@ long part1(const std::vector<int>& data, int preamble)
 {
     for (int i = preamble; i < data.size(); ++i)
         if (!checksum(data, i, preamble)) return data[i];
-    assert(false);
+    std::terminate();
 }
 
 long part2(const std::vector<int>& data, long invalid)
@@ -29,7 +28,7 @@ long part2(const std::vector<int>& data, long invalid)
         while (sum < invalid && jt != data.end()) sum += *jt++;
         if (sum == invalid) return *std::min_element(it, jt) + *std::max_element(it, jt);
     }
-    assert(false);
+    std::terminate();
 }
 
 int main()
