@@ -1,6 +1,19 @@
 # adventofcode
 
-## 2021
+## Usage
+
+C++
+```
+make 2021-day01
+```
+
+Rust
+```
+cargo run --bin 2021-day01
+```
+
+## Results
+### 2021
 
 ```txt
       -------Part 1--------   -------Part 2--------
@@ -32,7 +45,7 @@ Day       Time  Rank  Score       Time  Rank  Score
    1   00:04:31  2562      0   00:07:06  1333      0
 ```
 
-## 2020
+### 2020
 
 ```txt
       --------Part 1--------   --------Part 2--------
