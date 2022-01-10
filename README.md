@@ -7,9 +7,20 @@ C++
 make 2021-day01-cpp
 ```
 
+Go
+```
+make 2021-day01-go
+```
+
+
 Rust
 ```
 make 2021-day01-rs
+```
+
+Debug
+```
+make 2021-day01-cpp DEBUG=1
 ```
 
 ## Results
