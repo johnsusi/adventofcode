@@ -4,12 +4,12 @@
 
 C++
 ```
-make 2021-day01
+make 2021-day01-cpp
 ```
 
 Rust
 ```
-cargo run --bin 2021-day01
+make 2021-day01-rs
 ```
 
 ## Results

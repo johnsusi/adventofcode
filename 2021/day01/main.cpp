@@ -34,7 +34,7 @@ auto part2(auto numbers)
 
 int main()
 {
-    auto input = parse(std::ifstream("data.txt"));
+    auto input = parse(std::ifstream("2021/day01/data.txt"));
     std::cout << part1(input) << std::endl; // 1400
     std::cout << part2(input) << std::endl; // 1429
     return 0;
